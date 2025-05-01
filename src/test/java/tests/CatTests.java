@@ -76,7 +76,7 @@ public class CatTests {
     @Test
     @Order(2)
     @DisplayName("Cat Speak Hiss Tests")
-    public void dogGoesGrrTest()
+    public void catGoesHissTest()
     {
         actualCat = new Cat(AnimalType.WILD, Skin.UNKNOWN,Gender.UNKNOWN, Breed.UNKNOWN);
         assertEquals("The cat goes Hiss! Hiss!", actualCat.speak(), "I was expecting hiss");

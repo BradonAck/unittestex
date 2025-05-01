@@ -1,11 +1,14 @@
 package tests;
 
 import animals.AnimalType;
+import animals.petstore.pet.Pet;
 import animals.petstore.pet.attributes.Breed;
 import animals.petstore.pet.attributes.Gender;
+import animals.petstore.pet.attributes.PetType;
 import animals.petstore.pet.attributes.Skin;
 import animals.petstore.pet.types.Cat;
 import animals.petstore.pet.types.Dog;
+import animals.petstore.pet.types.Snake;
 import animals.petstore.store.DuplicatePetStoreRecordException;
 import animals.petstore.store.PetNotFoundSaleException;
 import animals.petstore.store.PetStore;
@@ -97,6 +100,83 @@ public class PetStoreTest
      * @throws DuplicatePetStoreRecordException if duplicate pet record is found
      * @throws PetNotFoundSaleException if pet is not found
      */
+
+
+
+    //Start New Testing for HW 1
+
+    @Test
+    @DisplayName("Setting Pet Store ID Test")
+    public void setPetStoreIdTest() {
+        //create a cat to begin the testing with an initial pet store ID
+        Cat cat = new Cat(AnimalType.DOMESTIC, Skin.FUR, Gender.MALE, Breed.UNKNOWN );
+
+        //test the initial ID is the expected value
+        assertEquals(0, cat.getPetStoreId(), "Expected initial ID is 0");
+
+        //change the ID to an arbitrary test value
+        int newID = 5;
+        cat.setPetStoreId(newID);
+
+        //test the new ID is the expected value
+        assertEquals(newID, cat.getPetStoreId(), "Expected new ID is 5");
+    }
+
+    @Test
+    @DisplayName("Unknown Type of Pet Test")
+    public void unknownPetTypeTest() {
+        Pet unknown = new Pet(PetType.BIRD, new BigDecimal("10.00"), Gender.MALE, 1) {
+            @Override
+            public String toString() {
+                return "Unknown Pet";
+            }
+        };
+
+        String expected = "Unknown Pet Type is unable to be sold";
+        Exception e = assertThrows(PetNotFoundSaleException.class, () ->{
+            petStore.soldPetItem(unknown);
+        });
+        assertEquals(expected, e.getMessage());
+    }
+
+    @Test
+    @DisplayName("Initialize with Duplicate Pet Test")
+    public void duplicatePetTest(){
+        petStore = new PetStore();
+
+        Dog dog2 = new Dog(AnimalType.DOMESTIC, Skin.FUR, Gender.MALE, Breed.POODLE, new BigDecimal("650.00"), 1);
+
+        petStore.initAddDuplicateItem(dog2);
+
+        assertEquals(6, petStore.getPetsForSale().size(), "Expected inventory does not match actual");
+
+        assertTrue(petStore.getPetsForSale().stream()
+                        .anyMatch(p -> p instanceof Dog &&
+                                ((Dog)p).getBreed() == Breed.POODLE &&
+                                p.getPetStoreId() == 1),
+                "Duplicate dog should be in inventory");
+
+        String expected = "Duplicate Dog record store id [1]";
+        Exception e = assertThrows(DuplicatePetStoreRecordException.class, () ->{
+            petStore.soldPetItem(dog2);
+        });
+        assertEquals(expected, e.getMessage());
+    }
+
+    @Test
+    @DisplayName("Snake Not Found Exception Test")
+    public void snakeNotFoundExceptionTest() {
+        Snake snake = new Snake(AnimalType.DOMESTIC, Skin.SCALES, Gender.MALE, Breed.BALL_PYTHON);
+        String expectedMessage = "The Pet is not part of the pet store!!";
+
+        Exception exception = assertThrows(PetNotFoundSaleException.class, () -> {
+            petStore.soldPetItem(snake);
+        });
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    //End New Testing for HW 1
+
     @TestFactory
     @DisplayName("Sale of Sphynx Remove Item Test2")
     public Stream<DynamicNode> sphynxSoldTest2() throws DuplicatePetStoreRecordException, PetNotFoundSaleException {
@@ -129,5 +209,7 @@ public class PetStoreTest
     {
         assertTrue(Numbers.isEven(number));
     }
+
+
 
 }
